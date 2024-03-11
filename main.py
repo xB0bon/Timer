@@ -2,6 +2,7 @@ from tkinter import *
 import time
 from pygame import mixer
 import threading
+from win10toast import ToastNotifier
 
 mixer.init()
 run = None
@@ -111,6 +112,11 @@ def buttonsstate():
     reset_button.config(state='normal')
 
 
+def send_notification(title, message):
+    toaster = ToastNotifier()
+    toaster.show_toast(title, message, duration=30)
+
+
 def start_timer():
     global run
     global time1
@@ -151,7 +157,10 @@ def start_timer():
                     seconds.set(str(sekundy))
 
                 if godziny == 0 and minuty == 0 and sekundy == 0 and run:
-                    mixer.Sound('sound/sound.mp3').play()
+                    alarm = mixer.Sound('sound/sound.mp3')
+                    alarm.play()
+                    time_now = time.strftime("%H:%M:%S")
+                    send_notification("KONIEC CZASU", f"Koniec czasu\n{time_now}")
                     hour.set('00')
                     minutes.set('00')
                     seconds.set('00')
