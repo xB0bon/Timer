@@ -120,7 +120,6 @@ def send_notification(title, message):
 def start_timer():
     global run
     global time1
-    print(run)
     start_button.config(state='disabled')
 
     if run:
@@ -174,7 +173,6 @@ def start_timer():
 
         pass
     run = False
-    print('end')
     start_button.config(state='disabled')
     time.sleep(1.5)
     start_button.config(state='normal')
