@@ -1,8 +1,11 @@
 from tkinter import *
 import time
 from pygame import mixer
+import threading
 
 mixer.init()
+run = None
+time1 = 0
 
 
 def update_window():
@@ -68,46 +71,123 @@ def seconds_subs():
         seconds.set('00')
 
 
-def start_timer():
-    time.sleep(1)
-    hours_clock = int(hour.get()) * 3600
-    minutes_clock = int(minutes.get()) * 60
-    seconds_clock = int(seconds.get())
+def start():
+    global time1, minutes_clock, seconds_clock
+    hours_clock = int(hour.get()[-2:]) * 3600
+    if int(minutes.get()[-2:]) < 60:
+        minutes_clock = int(minutes.get()[-2:]) * 60
+    if int(minutes.get()[-2:]) > 59:
+        minutes.set('59')
+        minutes_clock = int(minutes.get()[-2:]) * 60
+    if int(seconds.get()[-2:]) < 60:
+        seconds_clock = int(seconds.get()[-2:])
+    if int(seconds.get()[-2:]) > 59:
+        seconds.set('59')
+        seconds_clock = int(seconds.get()[-2:])
+
     time1 = int(hours_clock) + int(minutes_clock) + int(seconds_clock)
-    if time1 > 0:
-        time1 = time1 - 1
-        godziny = time1 // 3600
-        reszta_po_godzinach = time1 % 3600
-        minuty = reszta_po_godzinach // 60
-        sekundy = reszta_po_godzinach % 60
-        if len(str(godziny)) == 1:
-            hour.set('0' + str(godziny))
-        if len(str(minuty)) == 1:
-            minutes.set('0' + str(minuty))
-        if len(str(sekundy)) == 1:
-            seconds.set('0' + str(sekundy))
-
-        if len(str(godziny)) == 2:
-            hour.set(str(godziny))
-        if len(str(minuty)) == 2:
-            minutes.set(str(minuty))
-        if len(str(sekundy)) == 2:
-            seconds.set(str(sekundy))
-
-        if godziny == 0 and minuty == 0 and sekundy == 0:
-            mixer.Sound('sound/sound.mp3').play()
-            hour.set('00')
-            minutes.set('00')
-            seconds.set('00')
-        window.after(10, start_timer)
+    if time1 != 0:
+        global run
+        if not run:
+            run = True
+        else:
+            run = False
+        start_timer_thread()
     else:
         pass
+
+
+def start_timer_thread():
+    threading.Thread(target=start_timer).start()
+
+
+def buttonsstate():
+    h_up.config(state='normal')
+    h_down.config(state='normal')
+    s_up.config(state='normal')
+    s_down.config(state='normal')
+    m_up.config(state='normal')
+    m_down.config(state='normal')
+    reset_button.config(state='normal')
+
+
+def start_timer():
+    global run
+    global time1
+    print(run)
+    start_button.config(state='disabled')
+
+    if run:
+        while run and time1 > 0:
+            if time1 != 0:
+                h_up.config(state='disabled')
+                h_down.config(state='disabled')
+                s_up.config(state='disabled')
+                s_down.config(state='disabled')
+                m_up.config(state='disabled')
+                m_down.config(state='disabled')
+
+                reset_button.config(state='disabled')
+                start_button.config(bg='red', text='PAUSE')
+                time.sleep(1)
+                start_button.config(state='normal')
+                time1 = time1 - 1
+                godziny = time1 // 3600
+                reszta_po_godzinach = time1 % 3600
+                minuty = reszta_po_godzinach // 60
+                sekundy = reszta_po_godzinach % 60
+                if len(str(godziny)) == 1 and run:
+                    hour.set('0' + str(godziny))
+                if len(str(minuty)) == 1 and run:
+                    minutes.set('0' + str(minuty))
+                if len(str(sekundy)) == 1 and run:
+                    seconds.set('0' + str(sekundy))
+
+                if len(str(godziny)) == 2 and run:
+                    hour.set(str(godziny))
+                if len(str(minuty)) == 2 and run:
+                    minutes.set(str(minuty))
+                if len(str(sekundy)) == 2 and run:
+                    seconds.set(str(sekundy))
+
+                if godziny == 0 and minuty == 0 and sekundy == 0 and run:
+                    mixer.Sound('sound/sound.mp3').play()
+                    hour.set('00')
+                    minutes.set('00')
+                    seconds.set('00')
+                    buttonsstate()
+                    start_button.config(text='START', bg='green')
+            else:
+                start_button.config(state='normal')
+    else:
+        buttonsstate()
+        start_button.config(text='START', bg='green')
+
+        pass
+    run = False
+    print('end')
+    start_button.config(state='disabled')
+    time.sleep(1.5)
+    start_button.config(state='normal')
+
+
+def on_closing():
+    global run
+    run = False
+    window.destroy()
+
+
+def reset():
+    minutes.set('00')
+    hour.set('00')
+    seconds.set('00')
 
 
 window = Tk()
 window.title('Timer')
 window.geometry('500x500')
 window.config(bg='#131927')
+window.protocol("WM_DELETE_WINDOW", on_closing)
 # obrazki
 
 up_image = PhotoImage(file='img/up.png')
@@ -174,7 +254,10 @@ seconds_entry = Entry(timer_main_frame, bg='#131927', font=('consolas', 60, 'bol
 seconds_entry.grid(row=1, column=4)
 Label(timer_main_frame, text='seconds', bg='#131927', fg='white', font=('consolas', 15)).grid(row=1, column=5)
 
-start_button = Button(window, text='START', command=start_timer, bg='green', fg='white', width=5, font=('consolas', 20))
-start_button.pack(pady=30, padx=10)
-update_window()
+start_button = Button(window, text='START', command=start, bg='green', fg='white', width=5,
+                      font=('consolas', 20))
+start_button.pack(pady=25, padx=10)
+reset_button = Button(window, text='RESET', command=reset, bg='#7c4e4a', fg='white', width=5,
+                      font=('consolas', 20))
+reset_button.pack()
 window.mainloop()
