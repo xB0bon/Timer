@@ -2,7 +2,6 @@ from tkinter import *
 import time
 from pygame import mixer
 import threading
-from win10toast import ToastNotifier
 
 mixer.init()
 run = None
@@ -73,29 +72,31 @@ def seconds_subs():
 
 
 def start():
-    global time1, minutes_clock, seconds_clock
-    hours_clock = int(hour.get()[-2:]) * 3600
-    if int(minutes.get()[-2:]) < 60:
-        minutes_clock = int(minutes.get()[-2:]) * 60
-    if int(minutes.get()[-2:]) > 59:
-        minutes.set('59')
-        minutes_clock = int(minutes.get()[-2:]) * 60
-    if int(seconds.get()[-2:]) < 60:
-        seconds_clock = int(seconds.get()[-2:])
-    if int(seconds.get()[-2:]) > 59:
-        seconds.set('59')
-        seconds_clock = int(seconds.get()[-2:])
+    if start_button['state'] == 'normal':
+        global time1, minutes_clock, seconds_clock
+        hours_clock = int(hour.get()[-2:]) * 3600
+        if int(minutes.get()[-2:]) < 60:
+            minutes_clock = int(minutes.get()[-2:]) * 60
+        if int(minutes.get()[-2:]) > 59:
+            minutes.set('59')
+            minutes_clock = int(minutes.get()[-2:]) * 60
+        if int(seconds.get()[-2:]) < 60:
+            seconds_clock = int(seconds.get()[-2:])
+        if int(seconds.get()[-2:]) > 59:
+            seconds.set('59')
+            seconds_clock = int(seconds.get()[-2:])
 
-    time1 = int(hours_clock) + int(minutes_clock) + int(seconds_clock)
-    if time1 != 0:
-        global run
-        if not run:
-            run = True
+        time1 = int(hours_clock) + int(minutes_clock) + int(seconds_clock)
+        if time1 != 0:
+            global run
+            if not run:
+                run = True
+            else:
+                run = False
+            start_timer_thread()
         else:
-            run = False
-        start_timer_thread()
-    else:
-        pass
+            pass
+
 
 
 def start_timer_thread():
@@ -111,10 +112,6 @@ def buttonsstate():
     m_down.config(state='normal')
     reset_button.config(state='normal')
 
-
-def send_notification(title, message):
-    toaster = ToastNotifier()
-    toaster.show_toast(title, message, duration=30)
 
 
 def start_timer():
@@ -156,15 +153,16 @@ def start_timer():
                     seconds.set(str(sekundy))
 
                 if godziny == 0 and minuty == 0 and sekundy == 0 and run:
+                    start_button.config(text='START', bg='green')
                     alarm = mixer.Sound('sound/sound.mp3')
                     alarm.play()
                     time_now = time.strftime("%H:%M:%S")
-                    send_notification("KONIEC CZASU", f"Koniec czasu\n{time_now}")
                     hour.set('00')
                     minutes.set('00')
                     seconds.set('00')
+                    print('siema')
                     buttonsstate()
-                    start_button.config(text='START', bg='green')
+
             else:
                 start_button.config(state='normal')
     else:
@@ -194,7 +192,7 @@ window = Tk()
 window.title('Timer')
 window.geometry('500x500')
 window.config(bg='#131927')
-window.protocol("WM_DELETE_WINDOW", on_closing)
+window.bind('<Return>', lambda event: start())
 # obrazki
 
 up_image = PhotoImage(file='img/up.png')
