@@ -243,10 +243,11 @@ def start_timer():
                     minutes.set('00')
                     seconds.set('00')
                     buttonsstate()
-                    if want_shutdown:
-                        os.system("shutdown /s /t 15")
                     if want_clean:
                         clean()
+                    if want_shutdown:
+                        os.system("shutdown /s /t 15")
+
 
             else:
                 start_button.config(state='normal')
