@@ -2,10 +2,87 @@ from tkinter import *
 import time
 from pygame import mixer
 import threading
+import os
+import json
 
 mixer.init()
+try:
+    with open('data.json', 'r') as json_file:
+        loaded_data = json.load(json_file)
+
+    want_shutdown = loaded_data['want_shutdown']
+    want_clean = loaded_data['want_clean']
+except Exception as e:
+    print(e)
+    want_shutdown = False
+    want_clean = False
+
 run = None
 time1 = 0
+
+
+def settings():
+    global want_shutdown
+    global want_clean
+
+    def b_shut():
+        global want_shutdown
+        global want_clean
+        if not want_shutdown:
+            shutdown_button.config(image=on_image)
+            want_shutdown = True
+            loaded_data['want_shutdown'] = True
+        else:
+            shutdown_button.config(image=off_image)
+            want_shutdown = False
+            loaded_data['want_shutdown'] = False
+        data = {'want_clean': want_clean,
+                'want_shutdown': want_shutdown}
+        with open('data.json', 'w') as new_json:
+            json.dump(data, new_json)
+
+    def b_clean():
+        global want_clean
+        global want_shutdown
+        if not want_clean:
+            clean_button.config(image=on_image)
+            want_clean = True
+            loaded_data['want_clean'] = True
+        else:
+            clean_button.config(image=off_image)
+            want_clean = False
+            loaded_data['want_clean'] = False
+        data = {'want_clean': want_clean,
+                'want_shutdown': want_shutdown}
+        with open('data.json', 'w') as new_json:
+            json.dump(data, new_json)
+
+    settings = Toplevel()
+    settings.title("settings")
+    settings.geometry("300x400")
+    settings.resizable(False, False)
+    settings.grab_set()  # uniemozliwia edycje 1 okna
+
+    Label(settings, text="Settings:", font=('arial', 20)).grid(row=0, column=0, columnspan=1)
+    Label(settings, text="What after time?", font=('arial', 10)).grid(row=1, column=0, columnspan=1)
+    Label(settings, text="computer shutdown", font=('arial', 15)).grid(row=2, column=0, padx=5, pady=5)
+    on_image = PhotoImage(file="img/on-button.png")
+    off_image = PhotoImage(file="img/off-button.png")
+    shutdown_button = Button(settings, image=off_image, borderwidth=0, highlightthickness=0, command=b_shut)
+    shutdown_button.grid(row=2, column=1, padx=5, pady=5)
+    if want_shutdown:
+        shutdown_button.config(image=on_image)
+    if not want_shutdown:
+        shutdown_button.config(image=off_image)
+
+    Label(settings, text="cleaning temporary files", font=('arial', 13)).grid(row=3, column=0, padx=5, pady=5)
+    clean_button = Button(settings, image=off_image, borderwidth=0, highlightthickness=0, command=b_clean)
+    clean_button.grid(row=3, column=1, padx=5, pady=5)
+    if want_clean:
+        clean_button.config(image=on_image)
+    if not want_clean:
+        clean_button.config(image=off_image)
+    settings.mainloop()
 
 
 def update_window():
@@ -98,7 +175,6 @@ def start():
             pass
 
 
-
 def start_timer_thread():
     threading.Thread(target=start_timer).start()
 
@@ -111,8 +187,14 @@ def buttonsstate():
     m_up.config(state='normal')
     m_down.config(state='normal')
     reset_button.config(state='normal')
-
-
+def clean():
+    try:
+        os.system("del /q %temp%\*")
+        os.system("del /q C:\Windows\Temp\*")
+        os.system("rd /s /q C:\$Recycle.Bin")
+        os.system("del /q /s /f C:\Windows\Logs\*")
+    except Exception as e:
+        print(e)
 
 def start_timer():
     global run
@@ -156,12 +238,14 @@ def start_timer():
                     start_button.config(text='START', bg='green')
                     alarm = mixer.Sound('sound/sound.mp3')
                     alarm.play()
-                    time_now = time.strftime("%H:%M:%S")
                     hour.set('00')
                     minutes.set('00')
                     seconds.set('00')
-                    print('siema')
                     buttonsstate()
+                    if want_shutdown:
+                        os.system("shutdown /s /t 15")
+                    if want_clean:
+                        clean()
 
             else:
                 start_button.config(state='normal')
@@ -193,13 +277,16 @@ window.title('Timer')
 window.geometry('500x500')
 window.config(bg='#131927')
 window.bind('<Return>', lambda event: start())
+window.resizable(False, False)
 # obrazki
 
 up_image = PhotoImage(file='img/up.png')
 down_image = PhotoImage(file='img/down.png')
 
 # Napis: TIMER
-Label(window, text='TIMER', font=('Consolas', 40, 'bold'), bg='#131927', fg='#55ed00').pack()
+Label(window, text='TIMER', font=('Consolas', 40, 'bold'), bg='#131927', fg='#55ed00').pack(anchor=CENTER)
+settings = Button(window, text='setings', bg='white', command=settings)
+settings.place(x=440, y='20')
 
 # Aktualny czas
 time_now = StringVar(window)
