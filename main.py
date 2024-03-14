@@ -31,11 +31,11 @@ def settings():
         if not want_shutdown:
             shutdown_button.config(image=on_image)
             want_shutdown = True
-            loaded_data['want_shutdown'] = True
+
         else:
             shutdown_button.config(image=off_image)
             want_shutdown = False
-            loaded_data['want_shutdown'] = False
+
         data = {'want_clean': want_clean,
                 'want_shutdown': want_shutdown}
         with open('data.json', 'w') as new_json:
@@ -47,11 +47,9 @@ def settings():
         if not want_clean:
             clean_button.config(image=on_image)
             want_clean = True
-            loaded_data['want_clean'] = True
         else:
             clean_button.config(image=off_image)
             want_clean = False
-            loaded_data['want_clean'] = False
         data = {'want_clean': want_clean,
                 'want_shutdown': want_shutdown}
         with open('data.json', 'w') as new_json:
@@ -187,6 +185,8 @@ def buttonsstate():
     m_up.config(state='normal')
     m_down.config(state='normal')
     reset_button.config(state='normal')
+
+
 def clean():
     try:
         os.system("del /q %temp%\*")
@@ -195,6 +195,7 @@ def clean():
         os.system("del /q /s /f C:\Windows\Logs\*")
     except Exception as e:
         print(e)
+
 
 def start_timer():
     global run
