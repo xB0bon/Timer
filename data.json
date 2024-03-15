@@ -1,1 +1,1 @@
-{"want_clean": true, "want_shutdown": false}
+{"want_clean": false, "want_shutdown": false, "want_restart": false}

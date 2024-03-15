@@ -100,6 +100,7 @@ def settings():
         file = None
     global file
     settings = Toplevel()
+    settings.iconbitmap('ico/settings.ico')
     settings.title("settings")
     settings.geometry("350x400")
     settings.resizable(False, False)
@@ -138,8 +139,8 @@ def settings():
 
     file_path.set(file)
     Label(settings, textvariable=file_path, wraplength=200).grid(row=6, column=0, padx=5, pady=5)
-    reset_file_path = Button(settings, text='RESET', command=reset_file)
-    reset_file_path.grid(row=6, column=1, padx=5, pady=5)
+    reset_button = Button(settings, text='RESET', command=reset_file)
+    reset_button.grid(row=6, column=1, padx=5, pady=5)
     settings.mainloop()
 
 
@@ -349,6 +350,7 @@ def reset():
 
 
 window = Tk()
+window.iconbitmap('ico/favicon.ico')
 window.title('Timer')
 window.geometry('500x500')
 window.config(bg='#131927')
@@ -361,7 +363,9 @@ down_image = PhotoImage(file='img/down.png')
 
 # Napis: TIMER
 Label(window, text='TIMER', font=('Consolas', 40, 'bold'), bg='#131927', fg='#55ed00').pack(anchor=CENTER)
-settings = Button(window, text='setings', bg='white', command=settings)
+settings_image = PhotoImage(file='img/settings.png')
+settings = Button(window, image=settings_image, bg='#131927', command=settings, activebackground='#162334',
+              relief='flat', borderwidth=0, border=0)
 settings.place(x=440, y='20')
 
 # Aktualny czas
