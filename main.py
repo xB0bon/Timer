@@ -313,21 +313,20 @@ def start_timer():
                     minutes.set('00')
                     seconds.set('00')
                     buttonsstate()
-                    print(want_shutdown)
-                    print(want_restart)
+
                     if want_clean:
                         clean()
-                    print(1)
+
                     if file_exist:
                         open_scipt()
-                    print(2)
+
                     if want_shutdown:
                         os.system("shutdown /s /t 15")
                         print('wykonano')
-                    print(4)
+
                     if want_restart:
                         os.system("shutdown /r /t 15")
-                    print('5 end')
+
 
 
 
