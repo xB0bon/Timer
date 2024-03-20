@@ -7,8 +7,8 @@ import os
 import json
 
 file_exist = False
-mixer.init()
-file = 'localization'
+
+file = 'Localization'
 try:
     with open('data.json', 'r') as json_file:
         loaded_data = json.load(json_file)
@@ -156,14 +156,14 @@ def settings():
 
     on_image = PhotoImage(file="img/on-button.png")
     off_image = PhotoImage(file="img/off-button.png")
-    Label(settings, text="Sound", font=('arial', 15)).grid(row=2, column=0, padx=5, pady=5)
+    Label(settings, text="Sound information", font=('arial', 15)).grid(row=2, column=0, padx=5, pady=5)
     sound_button = Button(settings, image=off_image, borderwidth=0, highlightthickness=0, command=b_sound)
     sound_button.grid(row=2, column=1, padx=5, pady=5)
     if want_sound:
         sound_button.config(image=on_image)
     if not want_sound:
         sound_button.config(image=off_image)
-    Label(settings, text="computer shutdown", font=('arial', 15)).grid(row=3, column=0, padx=5, pady=5)
+    Label(settings, text="Computer shutdown", font=('arial', 15)).grid(row=3, column=0, padx=5, pady=5)
     shutdown_button = Button(settings, image=off_image, borderwidth=0, highlightthickness=0, command=b_shut)
     shutdown_button.grid(row=3, column=1, padx=5, pady=5)
     if want_shutdown:
@@ -171,7 +171,7 @@ def settings():
     if not want_shutdown:
         shutdown_button.config(image=off_image)
 
-    Label(settings, text="cleaning temporary files", font=('arial', 13)).grid(row=4, column=0, padx=5, pady=5)
+    Label(settings, text="Cleaning temporary files", font=('arial', 13)).grid(row=4, column=0, padx=5, pady=5)
     clean_button = Button(settings, image=off_image, borderwidth=0, highlightthickness=0, command=b_clean)
     clean_button.grid(row=4, column=1, padx=5, pady=5)
     if want_clean:
@@ -194,7 +194,7 @@ def settings():
     if not want_script_z:
         choose_button1.config(image=off_image)
 
-    choose_button = Button(settings, text='choose a script', command=choose)
+    choose_button = Button(settings, text='Choose a script', command=choose)
     choose_button.grid(row=7, column=0, padx=5, pady=5)
     file_path = StringVar(settings)
 
@@ -369,6 +369,7 @@ def start_timer():
                 if godziny == 0 and minuty == 0 and sekundy == 0 and run:
                     start_button.config(text='START', bg='green')
                     if want_sound:
+                        mixer.init()
                         alarm = mixer.Sound('sound/sound.mp3')
                         alarm.play()
                     hour.set('00')
