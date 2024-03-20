@@ -22,6 +22,7 @@ try:
         want_shutdown = False
 except Exception as e:
     print(e)
+    want_sound = False
     want_shutdown = False
     want_clean = False
     want_restart = False
