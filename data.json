@@ -1,1 +1,1 @@
-{"want_clean": false, "want_shutdown": false, "want_restart": false}
+{"want_sound": false, "want_clean": true, "want_shutdown": true, "want_restart": false, "want_script": false}

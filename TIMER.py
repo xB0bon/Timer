@@ -5,6 +5,7 @@ from pygame import mixer
 import threading
 import os
 import json
+
 file_exist = False
 mixer.init()
 file = 'localization'
@@ -12,9 +13,11 @@ try:
     with open('data.json', 'r') as json_file:
         loaded_data = json.load(json_file)
 
+    want_sound = loaded_data['want_sound']
     want_shutdown = loaded_data['want_shutdown']
     want_clean = loaded_data['want_clean']
     want_restart = loaded_data['want_restart']
+    want_script_z = loaded_data['want_script']
     if want_shutdown and want_restart:
         want_shutdown = False
 except Exception as e:
@@ -22,6 +25,7 @@ except Exception as e:
     want_shutdown = False
     want_clean = False
     want_restart = False
+    want_script_z = False
 
 run = None
 time1 = 0
@@ -30,7 +34,23 @@ time1 = 0
 def settings():
     global want_shutdown
     global want_clean
-    global want_restart
+    global want_restart, want_sound
+
+    def b_sound():
+        global want_sound
+        if not want_sound:
+            want_sound = True
+            sound_button.config(image=on_image)
+        else:
+            want_sound = False
+            sound_button.config(image=off_image)
+        data = {"want_sound": want_sound,
+                'want_clean': want_clean,
+                'want_shutdown': want_shutdown,
+                'want_restart': want_restart,
+                'want_script': want_script_z}
+        with open('data.json', 'w') as new_json:
+            json.dump(data, new_json)
 
     def b_shut():
         global want_shutdown, want_restart
@@ -45,9 +65,11 @@ def settings():
             want_restart = False
             restart_button.config(image=off_image)
 
-        data = {'want_clean': want_clean,
+        data = {"want_sound": want_sound,
+                'want_clean': want_clean,
                 'want_shutdown': want_shutdown,
-                'want_restart': want_restart}
+                'want_restart': want_restart,
+                'want_script': want_script_z}
         with open('data.json', 'w') as new_json:
             json.dump(data, new_json)
 
@@ -60,25 +82,29 @@ def settings():
         else:
             want_clean = False
             clean_button.config(image=off_image)
-        data = {'want_clean': want_clean,
+        data = {"want_sound": want_sound,
+                'want_clean': want_clean,
                 'want_shutdown': want_shutdown,
-                'want_restart': want_restart}
+                'want_restart': want_restart,
+                'want_script': want_script_z}
         with open('data.json', 'w') as new_json:
             json.dump(data, new_json)
 
     def b_restart():
         global want_clean, want_restart, want_shutdown
-        if want_restart:
-            want_restart = False
-            shutdown_button.config(image=off_image)
         if not want_restart:
             want_restart = True
             restart_button.config(image=on_image)
             want_shutdown = False
             shutdown_button.config(image=off_image)
-        data = {'want_clean': want_clean,
+        else:
+            want_restart = False
+            restart_button.config(image=off_image)
+        data = {"want_sound": want_sound,
+                'want_clean': want_clean,
                 'want_shutdown': want_shutdown,
-                'want_restart': want_restart}
+                'want_restart': want_restart,
+                'want_script': want_script_z}
         with open('data.json', 'w') as new_json:
             json.dump(data, new_json)
 
@@ -93,54 +119,88 @@ def settings():
             file_path.set(file)
         else:
             file_exist = False
+
+    def b_want_script():
+        global want_script_z
+        if not want_script_z:
+            want_script_z = True
+            choose_button1.config(image=on_image)
+        else:
+            want_script_z = False
+            choose_button1.config(image=off_image)
+        data = {"want_sound": want_sound,
+                'want_clean': want_clean,
+                'want_shutdown': want_shutdown,
+                'want_restart': want_restart,
+                'want_script': want_script_z}
+        with open('data.json', 'w') as new_json:
+            json.dump(data, new_json)
+
     def reset_file():
         global file_exist, file
         file_exist = False
         file_path.set('')
         file = None
-    global file
+
+    global file, want_script_z, want_clean
     settings = Toplevel()
     settings.iconbitmap('ico/settings.ico')
     settings.title("settings")
-    settings.geometry("350x400")
+    settings.geometry("350x530")
     settings.resizable(False, False)
     settings.grab_set()  # uniemozliwia edycje 1 okna
 
     Label(settings, text="Settings:", font=('arial', 20)).grid(row=0, column=0, columnspan=1)
     Label(settings, text="What after time?", font=('arial', 10)).grid(row=1, column=0, columnspan=1)
-    Label(settings, text="computer shutdown", font=('arial', 15)).grid(row=2, column=0, padx=5, pady=5)
+
     on_image = PhotoImage(file="img/on-button.png")
     off_image = PhotoImage(file="img/off-button.png")
+    Label(settings, text="Sound", font=('arial', 15)).grid(row=2, column=0, padx=5, pady=5)
+    sound_button = Button(settings, image=off_image, borderwidth=0, highlightthickness=0, command=b_sound)
+    sound_button.grid(row=2, column=1, padx=5, pady=5)
+    if want_sound:
+        sound_button.config(image=on_image)
+    if not want_sound:
+        sound_button.config(image=off_image)
+    Label(settings, text="computer shutdown", font=('arial', 15)).grid(row=3, column=0, padx=5, pady=5)
     shutdown_button = Button(settings, image=off_image, borderwidth=0, highlightthickness=0, command=b_shut)
-    shutdown_button.grid(row=2, column=1, padx=5, pady=5)
+    shutdown_button.grid(row=3, column=1, padx=5, pady=5)
     if want_shutdown:
         shutdown_button.config(image=on_image)
     if not want_shutdown:
         shutdown_button.config(image=off_image)
 
-    Label(settings, text="cleaning temporary files", font=('arial', 13)).grid(row=3, column=0, padx=5, pady=5)
+    Label(settings, text="cleaning temporary files", font=('arial', 13)).grid(row=4, column=0, padx=5, pady=5)
     clean_button = Button(settings, image=off_image, borderwidth=0, highlightthickness=0, command=b_clean)
-    clean_button.grid(row=3, column=1, padx=5, pady=5)
+    clean_button.grid(row=4, column=1, padx=5, pady=5)
     if want_clean:
         clean_button.config(image=on_image)
     if not want_clean:
         clean_button.config(image=off_image)
-    Label(settings, text="Restart computer", font=('arial', 13)).grid(row=4, column=0, padx=5, pady=5)
+    Label(settings, text="Restart computer", font=('arial', 13)).grid(row=5, column=0, padx=5, pady=5)
     restart_button = Button(settings, image=off_image, borderwidth=0, highlightthickness=0, command=b_restart)
-    restart_button.grid(row=4, column=1, padx=5, pady=5)
+    restart_button.grid(row=5, column=1, padx=5, pady=5)
     if want_restart and not want_shutdown:
         restart_button.config(image=on_image)
     if not want_restart:
         restart_button.config(image=off_image)
-    Label(settings, text="Start script:", font=('arial', 13)).grid(row=5, column=0, padx=5, pady=5)
+    Label(settings, text="Start script:", font=('arial', 13)).grid(row=6, column=0, padx=5, pady=5)
+
+    choose_button1 = Button(settings, image=off_image, borderwidth=0, highlightthickness=0, command=b_want_script)
+    choose_button1.grid(row=6, column=1, padx=5, pady=5)
+    if want_script_z:
+        choose_button1.config(image=on_image)
+    if not want_script_z:
+        choose_button1.config(image=off_image)
+
     choose_button = Button(settings, text='choose a script', command=choose)
-    choose_button.grid(row=5, column=1, padx=5, pady=5)
+    choose_button.grid(row=7, column=0, padx=5, pady=5)
     file_path = StringVar(settings)
 
     file_path.set(file)
-    Label(settings, textvariable=file_path, wraplength=200).grid(row=6, column=0, padx=5, pady=5)
+    Label(settings, textvariable=file_path, wraplength=200).grid(row=7, column=1, padx=5, pady=5)
     reset_button = Button(settings, text='RESET', command=reset_file)
-    reset_button.grid(row=6, column=1, padx=5, pady=5)
+    reset_button.grid(row=8, column=1, padx=5, pady=5)
     settings.mainloop()
 
 
@@ -307,8 +367,9 @@ def start_timer():
 
                 if godziny == 0 and minuty == 0 and sekundy == 0 and run:
                     start_button.config(text='START', bg='green')
-                    alarm = mixer.Sound('sound/sound.mp3')
-                    alarm.play()
+                    if want_sound:
+                        alarm = mixer.Sound('sound/sound.mp3')
+                        alarm.play()
                     hour.set('00')
                     minutes.set('00')
                     seconds.set('00')
@@ -317,7 +378,7 @@ def start_timer():
                     if want_clean:
                         clean()
 
-                    if file_exist:
+                    if file_exist and want_script_z:
                         open_scipt()
 
                     if want_shutdown:
@@ -371,7 +432,7 @@ down_image = PhotoImage(file='img/down.png')
 Label(window, text='TIMER', font=('Consolas', 40, 'bold'), bg='#131927', fg='#55ed00').pack(anchor=CENTER)
 settings_image = PhotoImage(file='img/settings.png')
 settings = Button(window, image=settings_image, bg='#131927', command=settings, activebackground='#162334',
-              relief='flat', borderwidth=0, border=0)
+                  relief='flat', borderwidth=0, border=0)
 settings.place(x=440, y='20')
 
 # Aktualny czas
