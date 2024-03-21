@@ -126,9 +126,15 @@ def settings():
         if not want_script_z:
             want_script_z = True
             choose_button1.config(image=on_image)
+            reset_button.place(x=150, y=378)
+            choose_button.grid(row=7, column=0, padx=5, pady=5)
+            lokalizacja.place(x=200, y=440)
         else:
             want_script_z = False
             choose_button1.config(image=off_image)
+            choose_button.grid_forget()
+            reset_button.place_forget()
+            lokalizacja.place_forget()
         data = {"want_sound": want_sound,
                 'want_clean': want_clean,
                 'want_shutdown': want_shutdown,
@@ -138,10 +144,11 @@ def settings():
             json.dump(data, new_json)
 
     def reset_file():
-        global file_exist, file
+        global file_exist, file, want_script_z
         file_exist = False
-        file_path.set('')
+        file_path.set('None')
         file = None
+        want_script_z = True
 
     global file, want_script_z, want_clean
     settings = Toplevel()
@@ -151,58 +158,67 @@ def settings():
     settings.resizable(False, False)
     settings.grab_set()  # uniemozliwia edycje 1 okna
 
-    Label(settings, text="Settings:", font=('arial', 20)).grid(row=0, column=0, columnspan=1)
-    Label(settings, text="What after time?", font=('arial', 10)).grid(row=1, column=0, columnspan=1)
+    Label(settings, text="Settings:", font=('arial', 20)).grid(row=0, column=0, columnspan=1, sticky="w")
+    Label(settings, text="What after time?", font=('arial', 10)).grid(row=1, column=0, columnspan=1, sticky="w")
 
     on_image = PhotoImage(file="img/on-button.png")
     off_image = PhotoImage(file="img/off-button.png")
-    Label(settings, text="Sound information", font=('arial', 15)).grid(row=2, column=0, padx=5, pady=5)
+    Label(settings, text="Sound information", font=('arial', 15), anchor="nw", justify="left").grid(row=2, column=0, padx=5, pady=5, sticky="w")
     sound_button = Button(settings, image=off_image, borderwidth=0, highlightthickness=0, command=b_sound)
     sound_button.grid(row=2, column=1, padx=5, pady=5)
     if want_sound:
         sound_button.config(image=on_image)
     if not want_sound:
         sound_button.config(image=off_image)
-    Label(settings, text="Computer shutdown", font=('arial', 15)).grid(row=3, column=0, padx=5, pady=5)
+    Label(settings, text="Computer shutdown", font=('arial', 15), anchor="nw", justify="left").grid(row=3, sticky="w",
+                                                                                                    column=0, padx=5, pady=5)
     shutdown_button = Button(settings, image=off_image, borderwidth=0, highlightthickness=0, command=b_shut)
-    shutdown_button.grid(row=3, column=1, padx=5, pady=5)
+    shutdown_button.grid(row=3, column=1, padx=5, pady=5, sticky="w")
     if want_shutdown:
         shutdown_button.config(image=on_image)
     if not want_shutdown:
         shutdown_button.config(image=off_image)
 
-    Label(settings, text="Cleaning temporary files", font=('arial', 13)).grid(row=4, column=0, padx=5, pady=5)
+    Label(settings, text="Cleaning temporary files", font=('arial', 15), anchor="nw", justify="left").grid(row=4, sticky="w", column=0, padx=5, pady=5)
     clean_button = Button(settings, image=off_image, borderwidth=0, highlightthickness=0, command=b_clean)
     clean_button.grid(row=4, column=1, padx=5, pady=5)
     if want_clean:
         clean_button.config(image=on_image)
     if not want_clean:
         clean_button.config(image=off_image)
-    Label(settings, text="Restart computer", font=('arial', 13)).grid(row=5, column=0, padx=5, pady=5)
+    Label(settings, text="Restart computer", font=('arial', 15), anchor="nw", justify="left").grid(row=5, sticky="w", column=0, padx=5, pady=5)
     restart_button = Button(settings, image=off_image, borderwidth=0, highlightthickness=0, command=b_restart)
     restart_button.grid(row=5, column=1, padx=5, pady=5)
     if want_restart and not want_shutdown:
         restart_button.config(image=on_image)
     if not want_restart:
         restart_button.config(image=off_image)
-    Label(settings, text="Start script:", font=('arial', 13)).grid(row=6, column=0, padx=5, pady=5)
+    Label(settings, text="Start script:", font=('arial', 15), anchor="nw", justify="left").grid(row=6, sticky="w", column=0, padx=5, pady=5)
 
     choose_button1 = Button(settings, image=off_image, borderwidth=0, highlightthickness=0, command=b_want_script)
-    choose_button1.grid(row=6, column=1, padx=5, pady=5)
-    if want_script_z:
-        choose_button1.config(image=on_image)
-    if not want_script_z:
-        choose_button1.config(image=off_image)
+    choose_button1.grid(row=6, column=1, padx=5, pady=5, sticky='e')
+
 
     choose_button = Button(settings, text='Choose a script', command=choose)
-    choose_button.grid(row=7, column=0, padx=5, pady=5)
+
     file_path = StringVar(settings)
 
     file_path.set(file)
-    Label(settings, textvariable=file_path, wraplength=200).grid(row=7, column=1, padx=5, pady=5)
+    lokalizacja = Label(settings, textvariable=file_path, wraplength=200)
+
     reset_button = Button(settings, text='RESET', command=reset_file)
-    reset_button.grid(row=8, column=1, padx=5, pady=5)
+    if want_script_z:
+        choose_button1.config(image=on_image)
+        reset_button.place(x=150, y=378)
+        choose_button.grid(row=7, column=0, padx=5, pady=5)
+        lokalizacja.place(x=200, y=440)
+    if not want_script_z:
+        choose_button1.config(image=off_image)
+        choose_button.grid_forget()
+        reset_button.place_forget()
+        lokalizacja.place_forget()
     settings.mainloop()
+
 
 
 def update_window():
